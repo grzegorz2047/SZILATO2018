@@ -80,6 +80,9 @@ class Intro:
                 if (action == "play"):
                     game = Game(self.screen)
                     game.run()
+                elif (action == "geneticPrepare"):
+                    game = Game(self.screen)
+                    game.learnGenetic()
                 elif (action == "quit"):
                     pg.quit()
                     quit()
@@ -93,6 +96,7 @@ class Intro:
         self.screen.blit(self.bg, (0,0))
         self.all_sprites.draw(self.screen)
         self.start = self.button(125, "START GAME", "play")
+        self.geneticPrepare = self.button(30, "Genetic prepare", "geneticPrepare")
         self.quit = self.button(210, "QUIT", "quit")
         pg.display.flip()
 

@@ -4,8 +4,10 @@ from sprites import *
 from map import *
 from game_logic import *
 from os import path
-from interface import *
 
+from  genetic import *
+
+from interface import *
 import copy
 import knowledge_frames
 class Game:
@@ -50,6 +52,10 @@ class Game:
         pg.quit()
         sys.exit()
 
+    def learnGenetic(self):
+        geneticImp = GeneticAlgorithmImplementation()
+        geneticImp.run()
+        
     def update(self):
         # update portion of the game loop
         self.all_sprites.update()
