@@ -55,7 +55,7 @@ class Phenotype:
         return child
 
     def mutate(self):
-        if random.uniform(0, 1) <= 0.25:
+        if random.uniform(0, 1) <= 0.05:
             return 1
         
 class Genotype:
@@ -93,29 +93,32 @@ class Genotype:
             mapTileType = self.tileMap[gene.y][gene.x];
             #print("type ", mapTileType)
             grass = "."
-            if abs(gene.at - playerAt) > 0.5 or abs(gene.deff - playerDeff) > 0.5:
-                fitnesSum = fitnesSum - 20
-            else:
-                fitnesSum = fitnesSum + 20
+            fitnesSum = fitnesSum - gene.hp
+            fitnesSum = fitnesSum - (gene.deff * 8)
+            fitnesSum = fitnesSum - (gene.at * 2)
+            fitnesSum = fitnesSum - (gene.type * 220)
+            fitnesSum = fitnesSum + playerAt
+            fitnesSum = fitnesSum + playerDeff
+
             if mapTileType == grass:
                 #print("gut")
                 if gene.x == 1 and gene.y == 1:
                     fitnesSum = fitnesSum - 50
-                else:
-                    fitnesSum = fitnesSum + 10
             else:
-                fitnesSum = fitnesSum - 10
+                fitnesSum = fitnesSum - 100000
             for gene2 in self.monsterGenes:
-                if gene != gene2:
-                    if gene.x == gene2.x and gene.y == gene2.y:
-                        fitnesSum = fitnesSum - 20
+                        if gene != gene2:
+                            if gene.x == gene2.x and gene.y == gene2.y:
+                                fitnesSum = fitnesSum - 100000
+                            else:
+                                fitnesSum = fitnesSum + 50
         return fitnesSum
         
 class GeneticAlgorithmImplementation:
     population = []
-    populationSize = 200
+    populationSize = 150
     generationNumber = 0
-    maxGenerationNumber = 500
+    acceptedFitness = 500
     def run(self, tileMap):
         self.tileMap = tileMap
         self.createFirstPopulation()
@@ -123,7 +126,7 @@ class GeneticAlgorithmImplementation:
         
     def evolvePopulation(self):
         print(self.tileMap)
-        while self.generationNumber < self.maxGenerationNumber:
+        while self.getBestFitnessValue() < self.acceptedFitness:
             self.generationNumber = self.generationNumber + 1
             self.combineBestSpecies()
             print ("Best fitness for ", self.generationNumber, " generation is ", self.getBestFitnessValue())
@@ -157,16 +160,18 @@ class GeneticAlgorithmImplementation:
         for one in self.population:
             species.append(one)
         
-        while len(species) > 0:
+        while len(newPopulation) < numOfSpeciesToBorn:
             #print("species len ", len(newPopulation))
             
             bestOne = self.getBestUnitFromRanking(species)
             species.remove(bestOne)
             if len(species) == 0:
-                bestTwo = newPopulation[0]
+                bestTwo = self.getBestUnitFromRanking(self.population)
             else: 
                 bestTwo = self.getBestUnitFromRanking(species)
             newChild = bestOne.crossover(bestTwo)
+            newPopulation.append(bestOne)
+            newPopulation.append(bestTwo)
             newPopulation.append(newChild)
         self.population = newPopulation
         
