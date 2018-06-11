@@ -4,8 +4,7 @@ from sprites import *
 from map import *
 from game_logic import *
 from os import path
-
-from  genetic import *
+from genetic import *
 
 from interface import *
 import copy
@@ -54,7 +53,8 @@ class Game:
 
     def learnGenetic(self):
         geneticImp = GeneticAlgorithmImplementation()
-        geneticImp.run()
+        print("Uruchamiam nauczanie algorytmu")
+        geneticImp.run(self.map.char_map_data)
         
     def update(self):
         # update portion of the game loop

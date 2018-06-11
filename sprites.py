@@ -156,7 +156,7 @@ class Player(Character):
     """Player's implementation of Character class, that handles displaying Player's character on screen"""
     def __init__(self, game, x, y):
         #POZIOM 1
-        hp = 70
+        hp = 700
         at = 70
         deff = 20
         lev = 1
