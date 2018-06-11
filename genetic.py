@@ -55,7 +55,7 @@ class Phenotype:
         return child
 
     def mutate(self):
-        if random.uniform(0, 1) <= 0.01:
+        if random.uniform(0, 1) <= 0.25:
             return 1
         
 class Genotype:
@@ -93,22 +93,27 @@ class Genotype:
             mapTileType = self.tileMap[gene.y][gene.x];
             #print("type ", mapTileType)
             grass = "."
-            fitnesSum = fitnesSum + playerAt - (gene.at * gene.deff + gene.hp)
-            
+            if abs(gene.at - playerAt) > 0.5 or abs(gene.deff - playerDeff) > 0.5:
+                fitnesSum = fitnesSum - 20
+            else:
+                fitnesSum = fitnesSum + 20
             if mapTileType == grass:
                 #print("gut")
-                fitnesSum = fitnesSum + 500000
+                if gene.x == 1 and gene.y == 1:
+                    fitnesSum = fitnesSum - 50
+                else:
+                    fitnesSum = fitnesSum + 10
             else:
-                fitnesSum = fitnesSum - 10000000
+                fitnesSum = fitnesSum - 10
             for gene2 in self.monsterGenes:
                 if gene != gene2:
                     if gene.x == gene2.x and gene.y == gene2.y:
-                        fitnesSum = fitnesSum - 10000000
+                        fitnesSum = fitnesSum - 20
         return fitnesSum
         
 class GeneticAlgorithmImplementation:
     population = []
-    populationSize = 300
+    populationSize = 200
     generationNumber = 0
     maxGenerationNumber = 500
     def run(self, tileMap):
@@ -136,7 +141,7 @@ class GeneticAlgorithmImplementation:
                 max = currentFitness
         return max
         
-    def getBestUnitFromWheel(self, units):
+    def getBestUnitFromRanking(self, units):
         #print("unit size ", len(units))
         max = units[0]
         for one in units:
@@ -155,12 +160,12 @@ class GeneticAlgorithmImplementation:
         while len(species) > 0:
             #print("species len ", len(newPopulation))
             
-            bestOne = self.getBestUnitFromWheel(species)
+            bestOne = self.getBestUnitFromRanking(species)
             species.remove(bestOne)
             if len(species) == 0:
                 bestTwo = newPopulation[0]
             else: 
-                bestTwo = self.getBestUnitFromWheel(species)
+                bestTwo = self.getBestUnitFromRanking(species)
             newChild = bestOne.crossover(bestTwo)
             newPopulation.append(newChild)
         self.population = newPopulation
@@ -169,7 +174,7 @@ class GeneticAlgorithmImplementation:
         open('output.txt', 'w').close()
         fo = open("output.txt", "w")
         fo.write(str("#") + "\n")
-        for gene in self.getBestUnitFromWheel(self.population).genotype.monsterGenes:
+        for gene in self.getBestUnitFromRanking(self.population).genotype.monsterGenes:
             fo.write(str(gene.type) +";" + str(gene.x) +";" + str(gene.y) + " \n")
         fo.write(str("#") + "\n")
         fo.close()
