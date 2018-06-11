@@ -61,6 +61,7 @@ class Map:
             for column in range(self.width):
                 temp_key = self.map_data[row][column]#Te ify, żeby kompilowało się :D W razie czego znajdzie się coś lepszego
                 # print(temp_key, end='')
+                self.char_map_data[row][column] = temp_key
                 if temp_key == '0':
                     self.tiles_data[row][column] = Bush(self.game, column, row, 1)
                 if temp_key == '1':

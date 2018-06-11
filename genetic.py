@@ -2,6 +2,15 @@ from random import *
 from math import floor
 from map import *
 
+stats = [#hp, attack, defense, type
+            [50, 60, 20, 0],
+            [100, 80, 30, 1],
+            [175, 110, 40, 2],
+            [275, 150, 50, 3],
+            [400, 200, 60, 4],
+            [650, 260, 70, 5]
+        ]
+
 #Klasa dla pojedynczego gatunku
 class Phenotype:
     def __init__(self, genotype, tileMap):
@@ -24,22 +33,30 @@ class Phenotype:
         childGenes = []
         midpoint = floor(randrange(gensLength)); 
         
-        for i in range(0, gensLength-1):
+        for i in range(0, gensLength):
             if i > midpoint:
                 childGenes.append(self.getGeneAt(i))
             else:
                 childGenes.append(partner.getGeneAt(i))
+        
+        
+        if self.mutate():
+            randX = randrange(10)
+            randY = randrange(10)
+            randIndex = randrange(len(stats))
+            monsterGot = stats[randIndex]
+            geneObj = GeneMonster(randX, randY, monsterGot[0], monsterGot[1], monsterGot[2], monsterGot[3])
+            childGenes[randrange(len(childGenes))] = geneObj
+        
         childGenotype = Genotype(self.tileMap)
         childGenotype.initGenes(childGenes)
         child = Phenotype(childGenotype, self.tileMap)
+        #print("Geny len ", len(childGenes))
         return child
 
-    def mutate(self, ):
+    def mutate(self):
         if random.uniform(0, 1) <= 0.01:
-            return randrange()
-        
-    def initPhenotype(self):
-        self.genotype = Genotype()
+            return 1
         
 class Genotype:
     monsterGenes = []
@@ -50,14 +67,7 @@ class Genotype:
         self.monsterGenes = genes
         
     def initRandomGenes(self):
-        stats = [#hp, attack, defense, type
-            [50, 60, 20, 0],
-            [100, 80, 30, 1],
-            [175, 110, 40, 2],
-            [275, 150, 50, 3],
-            [400, 200, 60, 4],
-            [650, 260, 70, 5]
-        ]
+        self.monsterGenes.clear()
         genNum = 10
         while genNum > 0:
             randX = randrange(10)
@@ -75,46 +85,44 @@ class Genotype:
         playerAt = 70
         playerDeff = 20
         
-        fitnesSum = 0
-        monsterAllStrength = 0
-        monsterAllDef = 0
-        monsterAllHp = 0        
+        fitnesSum = 0 
         mapWidth = 10
-        #print(self.tileMap)
+        
         for gene in self.monsterGenes:
         
             mapTileType = self.tileMap[gene.y][gene.x];
             #print("type ", mapTileType)
             grass = "."
+            fitnesSum = fitnesSum + playerAt - (gene.at * gene.deff + gene.hp)
+            
             if mapTileType == grass:
                 #print("gut")
-                fitnesSum = fitnesSum + 50
+                fitnesSum = fitnesSum + 500000
             else:
-                fitnesSum = fitnesSum - 1000
-            monsterAllStrength = monsterAllStrength + gene.at
-            monsterAllDef = monsterAllDef + gene.deff
-            monsterAllHp = monsterAllHp + gene.hp
-        fitnesSum = fitnesSum - abs(playerHp - monsterAllHp)
-        fitnesSum = fitnesSum - (abs(playerAt - monsterAllStrength) *2)
-        fitnesSum = fitnesSum - (abs(playerDeff - monsterAllDef))
+                fitnesSum = fitnesSum - 10000000
+            for gene2 in self.monsterGenes:
+                if gene != gene2:
+                    if gene.x == gene2.x and gene.y == gene2.y:
+                        fitnesSum = fitnesSum - 10000000
         return fitnesSum
         
 class GeneticAlgorithmImplementation:
     population = []
-    populationSize = 50
+    populationSize = 300
     generationNumber = 0
-    
+    maxGenerationNumber = 500
     def run(self, tileMap):
         self.tileMap = tileMap
         self.createFirstPopulation()
         self.evolvePopulation()
         
     def evolvePopulation(self):
-        while self.generationNumber < 150:
+        print(self.tileMap)
+        while self.generationNumber < self.maxGenerationNumber:
             self.generationNumber = self.generationNumber + 1
             self.combineBestSpecies()
             print ("Best fitness for ", self.generationNumber, " generation is ", self.getBestFitnessValue())
-
+            self.generateOutputAnswer()
     def createFirstPopulation(self):
         for x in range(0, self.populationSize):
             pheno = Phenotype(Genotype(self.tileMap), self.tileMap)
@@ -156,6 +164,16 @@ class GeneticAlgorithmImplementation:
             newChild = bestOne.crossover(bestTwo)
             newPopulation.append(newChild)
         self.population = newPopulation
+        
+    def generateOutputAnswer(self):
+        open('output.txt', 'w').close()
+        fo = open("output.txt", "w")
+        fo.write(str("#") + "\n")
+        for gene in self.getBestUnitFromWheel(self.population).genotype.monsterGenes:
+            fo.write(str(gene.type) +";" + str(gene.x) +";" + str(gene.y) + " \n")
+        fo.write(str("#") + "\n")
+        fo.close()
+
 class GeneMonster:
     def __init__(self, x, y, hp, at, deff, type):
         self.x = x
